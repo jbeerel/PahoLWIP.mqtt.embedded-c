@@ -17,14 +17,14 @@
 # MQTTClient Library - C
 
 
-file(GLOB SOURCES "*.c" "linux/*.c")
+file(GLOB SOURCES "*.c" "FreeRTOS/*.c")
 
 add_library(
-  paho-embed-mqtt3cc SHARED
+  paho-lwip-mqtt3cc STATIC
   ${SOURCES}
 )
-install(TARGETS paho-embed-mqtt3cc DESTINATION /usr/lib)
-target_include_directories(paho-embed-mqtt3cc PRIVATE "linux")
-target_link_libraries(paho-embed-mqtt3cc paho-embed-mqtt3c)
-target_compile_definitions(paho-embed-mqtt3cc PRIVATE
-             MQTTCLIENT_PLATFORM_HEADER=MQTTLinux.h MQTTCLIENT_QOS2=1)
+install(TARGETS paho-lwip-mqtt3cc DESTINATION /usr/lib)
+target_include_directories(paho-lwip-mqtt3cc PRIVATE "FreeRTOS" ${CMAKE_CURRENT_LIST_DIR})
+target_link_libraries( paho-lwip-mqtt3cc paho-lwip-mqtt3c pico_stdlib FreeRTOS-Kernel LWIP_PORT pico_cyw43_arch_lwip_sys_freertos)
+target_compile_definitions(paho-lwip-mqtt3cc PRIVATE
+             MQTTCLIENT_PLATFORM_HEADER=MQTTFreeRTOS.h MQTTCLIENT_QOS2=1)

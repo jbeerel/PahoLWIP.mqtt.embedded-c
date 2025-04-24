@@ -13,9 +13,11 @@
 #  Contributors:
 #     Ian Craggs - initial version
 #*******************************************************************************/
+include($ENV{FREERTOS_KERNEL_PATH}/portable/ThirdParty/GCC/RP2040/FreeRTOS_Kernel_import.cmake)
+include(${LWIP_CMAKE_PATH}) # lwip config files
 
-project("paho-mqttclient" C)
+project("paho-lwip-mqttclient" C)
 
 ADD_SUBDIRECTORY(src)
-ADD_SUBDIRECTORY(samples)
-ADD_SUBDIRECTORY(test)
+# ADD_SUBDIRECTORY(samples)
+# ADD_SUBDIRECTORY(test)

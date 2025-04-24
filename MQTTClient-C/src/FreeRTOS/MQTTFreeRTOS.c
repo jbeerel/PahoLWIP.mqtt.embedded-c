@@ -16,7 +16,7 @@
  *******************************************************************************/
 
 #include "MQTTFreeRTOS.h"
-
+#include "tcp_transport.h"
 
 int ThreadStart(Thread* thread, void (*fn)(void*), void* arg)
 {
@@ -95,8 +95,7 @@ int FreeRTOS_read(Network* n, unsigned char* buffer, int len, int timeout_ms)
 	{
 		int rc = 0;
 
-		FreeRTOS_setsockopt(n->my_socket, 0, FREERTOS_SO_RCVTIMEO, &xTicksToWait, sizeof(xTicksToWait));
-		rc = FreeRTOS_recv(n->my_socket, buffer + recvLen, len - recvLen, 0);
+		rc = tcp_read(n->my_socket, buffer + recvLen, len - recvLen, &xTicksToWait);
 		if (rc > 0)
 			recvLen += rc;
 		else if (rc < 0)
@@ -121,8 +120,7 @@ int FreeRTOS_write(Network* n, unsigned char* buffer, int len, int timeout_ms)
 	{
 		int rc = 0;
 
-		FreeRTOS_setsockopt(n->my_socket, 0, FREERTOS_SO_RCVTIMEO, &xTicksToWait, sizeof(xTicksToWait));
-		rc = FreeRTOS_send(n->my_socket, buffer + sentLen, len - sentLen, 0);
+		rc = tcp_send(n->my_socket, buffer + sentLen, len - sentLen, &xTicksToWait);
 		if (rc > 0)
 			sentLen += rc;
 		else if (rc < 0)
@@ -138,7 +136,7 @@ int FreeRTOS_write(Network* n, unsigned char* buffer, int len, int timeout_ms)
 
 void FreeRTOS_disconnect(Network* n)
 {
-	FreeRTOS_closesocket(n->my_socket);
+	tcp_close_socket(n->my_socket);
 }
 
 
@@ -148,31 +146,22 @@ void NetworkInit(Network* n)
 	n->mqttread = FreeRTOS_read;
 	n->mqttwrite = FreeRTOS_write;
 	n->disconnect = FreeRTOS_disconnect;
+
+	Init_TCP_Transport();
 }
 
 
 int NetworkConnect(Network* n, char* addr, int port)
 {
-	struct freertos_sockaddr sAddr;
 	int retVal = -1;
-	uint32_t ipAddress;
 
-	if ((ipAddress = FreeRTOS_gethostbyname(addr)) == 0)
-		goto exit;
-
-	sAddr.sin_port = FreeRTOS_htons(port);
-	sAddr.sin_addr = ipAddress;
-
-	if ((n->my_socket = FreeRTOS_socket(FREERTOS_AF_INET, FREERTOS_SOCK_STREAM, FREERTOS_IPPROTO_TCP)) < 0)
-		goto exit;
-
-	if ((retVal = FreeRTOS_connect(n->my_socket, &sAddr, sizeof(sAddr))) < 0)
+	if (!tcp_connect_socket(n->my_socket, addr, port))
 	{
-		FreeRTOS_closesocket(n->my_socket);
-	    goto exit;
+		tcp_close_socket(n->my_socket);
+	} else {
+		retVal = 0;
 	}
 
-exit:
 	return retVal;
 }
 
