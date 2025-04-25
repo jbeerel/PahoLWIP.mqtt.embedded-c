@@ -16,16 +16,19 @@
 
 # MQTTPacket Library
 file(GLOB SOURCES "*.c")
-add_library(paho-lwip-mqtt3c STATIC ${SOURCES})
+add_library(paho-lwip-mqtt3c INTERFACE ${SOURCES})
 install(TARGETS paho-lwip-mqtt3c DESTINATION /usr/lib)
-target_compile_definitions(paho-lwip-mqtt3c PRIVATE MQTT_SERVER MQTT_CLIENT)
+target_include_directories(paho-lwip-mqtt3c INTERFACE ${CMAKE_CURRENT_LIST_DIR})
+target_compile_definitions(paho-lwip-mqtt3c INTERFACE MQTT_SERVER MQTT_CLIENT)
 
-add_library(MQTTPacketClient STATIC MQTTFormat MQTTPacket
+add_library(MQTTPacketClient INTERFACE MQTTFormat MQTTPacket
             MQTTSerializePublish MQTTDeserializePublish
             MQTTConnectClient MQTTSubscribeClient MQTTUnsubscribeClient)
-target_compile_definitions(MQTTPacketClient PRIVATE MQTT_CLIENT)
+target_compile_definitions(MQTTPacketClient INTERFACE MQTT_CLIENT)
 
-add_library(MQTTPacketServer STATIC MQTTFormat MQTTPacket
+add_library(MQTTPacketServer INTERFACE MQTTFormat MQTTPacket
             MQTTSerializePublish MQTTDeserializePublish
             MQTTConnectServer MQTTSubscribeServer MQTTUnsubscribeServer)
-target_compile_definitions(MQTTPacketServer PRIVATE MQTT_SERVER)
+target_compile_definitions(MQTTPacketServer INTERFACE MQTT_SERVER)
+
+
