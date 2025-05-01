@@ -21,10 +21,18 @@ file(GLOB SOURCES "*.c" "FreeRTOS/*.c")
 
 add_library(
   paho-lwip-mqtt3cc INTERFACE
-  ${SOURCES}
 )
+
+target_sources(paho-lwip-mqtt3cc INTERFACE
+  ${SOURCES})
+
 install(TARGETS paho-lwip-mqtt3cc DESTINATION /usr/lib)
-target_include_directories(paho-lwip-mqtt3cc INTERFACE "FreeRTOS" ${CMAKE_CURRENT_LIST_DIR})
+
+target_include_directories(paho-lwip-mqtt3cc INTERFACE 
+    "FreeRTOS" 
+    ${CMAKE_CURRENT_LIST_DIR})
+
 target_link_libraries( paho-lwip-mqtt3cc INTERFACE paho-lwip-mqtt3c pico_stdlib FreeRTOS-Kernel LWIP_PORT pico_cyw43_arch_lwip_sys_freertos)
+
 target_compile_definitions(paho-lwip-mqtt3cc INTERFACE
              MQTTCLIENT_PLATFORM_HEADER=MQTTFreeRTOS.h MQTTCLIENT_QOS2=1)
